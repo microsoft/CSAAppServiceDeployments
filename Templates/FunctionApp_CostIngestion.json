@@ -1,0 +1,150 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+      "deploymentPrefix": {
+        "type": "string",
+        "defaultValue": "poc"
+      }
+    },
+    "variables": {
+      "gitUri": "https://raw.githubusercontent.com/microsoft/CSANestedTemplates/main/Templates",
+      "deployKeyVaultAccessTemplate": "[concat(variables('gitUri'),'/KeyVaultAccessPolicy.json')]",
+      "deployFunctionAppTemplate": "[concat(variables('gitUri'),'/ConsumptionFunctionApp.json')]",
+      "deployFunctionAppSettingsTemplate": "[concat(variables('gitUri'),'/WebAppSettings.json')]",
+      "deployFunctionGitHubTemplate": "[concat(variables('gitUri'),'/WebAppSourceControl.json')]",
+      "deployKeyVaultTemplate": "[concat(variables('gitUri'),'/KeyVault.json')]",
+      "deployKeyVaultSecretTemplate": "[concat(variables('gitUri'),'/KeyVaultSecret.json')]",
+      "deployLATemplateURL": "[concat(variables('gitUri'),'/Log_Analytics_Workspace.json')]",
+      "deployAppInsightsURL": "[concat(variables('gitUri'),'/ApplicationInsights.json')]",
+      "deployStorageAccountURL": "[concat(variables('gitUri'),'/StorageAccount.json')]",
+      "laName": "[concat(parameters('deploymentPrefix'),'la',uniqueString(resourceGroup().name))]",
+      "keyVaultName": "[concat(parameters('deploymentPrefix'),'kv',uniqueString(resourceGroup().name))]",
+      "appName": "[concat(parameters('deploymentPrefix'),'costingestionfa',uniqueString(resourceGroup().name))]",
+      "appInsightsName": "[concat(parameters('deploymentPrefix'),'ai',uniqueString(resourceGroup().name))]",
+      "saName": "[tolower(concat(parameters('deploymentPrefix'),'sa',uniqueString(resourceGroup().name)))]",
+      "appSettings": [
+          "AKS-SN|192.168.1.0/25|Enabled",
+          "Data-SN|192.168.1.176/28|Disabled",
+          "Shared-SN|192.168.1.160/28|Enabled",
+          "AzureBastionSubnet|192.168.1.128/28|Enabled",
+          "AppGW-SN|192.168.1.144/28|Enabled"
+      ]
+    },
+    "resources": [
+      {
+        "name": "deployLogAnalytics",
+        "type": "Microsoft.Resources/deployments",
+        "apiVersion": "2018-05-01",
+        "dependsOn": [],
+        "properties": {
+          "mode": "Incremental",
+          "templateLink": {
+            "uri": "[variables('deployLATemplateURL')]",
+            "contentVersion": "1.0.0.0"
+          },
+          "parameters": {
+            "workspaceName": {
+              "value": "[variables('laName')]"
+            }
+          }
+        }
+      },
+      {
+        "name": "deployAppInsights",
+        "type": "Microsoft.Resources/deployments",
+        "apiVersion": "2018-05-01",
+        "dependsOn": [],
+        "properties": {
+          "mode": "Incremental",
+          "templateLink": {
+            "uri": "[variables('deployAppInsightsURL')]",
+            "contentVersion": "1.0.0.0"
+          },
+          "parameters": {
+            "name": {
+              "value": "[variables('appInsightsName')]"
+            }
+          }
+        }
+      },
+      {
+        "name": "deployStorageAccount",
+        "type": "Microsoft.Resources/deployments",
+        "apiVersion": "2018-05-01",
+        "dependsOn": [],
+        "properties": {
+          "mode": "Incremental",
+          "templateLink": {
+            "uri": "[variables('deployStorageAccountURL')]",
+            "contentVersion": "1.0.0.0"
+          },
+          "parameters": {
+            "saName": {
+              "value": "[variables('saName')]"
+            },
+            "skuName": {
+                "value": "Standard_LRS"
+            },
+            "skuTier": {
+                "value": "Standard"
+            }
+          }
+        }
+      },
+      {
+        "name": "deployFunctionApp",
+        "type": "Microsoft.Resources/deployments",
+        "apiVersion": "2018-05-01",
+        "dependsOn": [
+            "deployStorageAccount"
+        ],
+        "properties": {
+          "mode": "Incremental",
+          "templateLink": {
+            "uri": "[variables('deployFunctionAppTemplate')]",
+            "contentVersion": "1.0.0.0"
+          },
+          "parameters": {
+            "appName": {
+              "value": "[variables('appName')]"
+            },
+            "saConnectionString": {
+                "value": "[reference('deployStorageAccount').outputs.saConnectionString.value]"
+            },
+            "runtime": {
+                "value": "dotnet"
+            }
+          }
+        }
+      },
+      {
+        "name": "deployFunctionApp",
+        "type": "Microsoft.Resources/deployments",
+        "apiVersion": "2018-05-01",
+        "dependsOn": [
+            "deployFunctionApp"
+        ],
+        "properties": {
+          "mode": "Incremental",
+          "templateLink": {
+            "uri": "[variables('deployFunctionGitHubTemplate')]",
+            "contentVersion": "1.0.0.0"
+          },
+          "parameters": {
+            "appName": {
+              "value": "[variables('appName')]"
+            },
+            "saConnectionString": {
+                "value": "[reference('deployStorageAccount').outputs.saConnectionString.value]"
+            },
+            "runtime": {
+                "value": "dotnet"
+            }
+          }
+        }
+      }
+    ],
+    "outputs": {
+    } 
+  }
