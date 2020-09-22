@@ -119,7 +119,7 @@
         }
       },
       {
-        "name": "deployFunctionApp",
+        "name": "deployFunctionGitHub",
         "type": "Microsoft.Resources/deployments",
         "apiVersion": "2018-05-01",
         "dependsOn": [
