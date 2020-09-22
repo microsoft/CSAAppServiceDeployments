@@ -135,11 +135,11 @@
             "appName": {
               "value": "[variables('appName')]"
             },
-            "saConnectionString": {
-                "value": "[reference('deployStorageAccount').outputs.saConnectionString.value]"
+            "repositoryURL": {
+                "value": "https://github.com/microsoft/CSAAppServiceDeployments"
             },
-            "runtime": {
-                "value": "dotnet"
+            "branch": {
+                "value": "dev"
             }
           }
         }
