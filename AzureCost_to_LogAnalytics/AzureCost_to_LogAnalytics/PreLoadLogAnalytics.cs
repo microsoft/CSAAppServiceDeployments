@@ -31,8 +31,7 @@ namespace AzureCost_to_LogAnalytics
         private static string workspaceid = Environment.GetEnvironmentVariable("workspaceid");
         private static string workspacekey = Environment.GetEnvironmentVariable("workspacekey");
         private static string logName = Environment.GetEnvironmentVariable("logName");
-        private static double daystoload = Convert.ToDouble(Environment.GetEnvironmentVariable("daystoLoad"));
-
+        
         public static string jsonResult { get; set; }
 
         private static string AuthToken { get; set; }
@@ -59,6 +58,7 @@ namespace AzureCost_to_LogAnalytics
         {
             DateTime time = DateTime.Now.AddDays(-1);
 
+            double daystoload = Convert.ToDouble(req.Query["days"]);
             string start = time.ToString("MM/dd/yyyy");
             string end = time.AddDays(-daystoload).ToString("MM/dd/yyyy");
 

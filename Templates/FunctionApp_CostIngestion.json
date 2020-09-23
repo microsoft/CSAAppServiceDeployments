@@ -5,13 +5,6 @@
       "deploymentPrefix": {
         "type": "string",
         "defaultValue": "poc"
-      },
-      "DaystoLoad": {
-        "type": "string",
-        "defaultValue": "30",
-        "allowedValues": [
-          "1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24","25","26","27","28","29","30"
-        ]
       }
     },
     "variables": {
@@ -124,8 +117,7 @@
                     "scope|subscriptions/5f1c1322-cebc-4ea3-8779-fac7d666e18f",
                     "[concat('workspaceid|',reference('deployLogAnalytics').outputs.workspaceId.value,'')]",
                     "[concat('workspacekey|',reference('deployLogAnalytics').outputs.workspaceKey.value,'')]",
-                    "[concat('APPINSIGHTS_INSTRUMENTATIONKEY|',reference('deployAppInsights').outputs.aiKey.value,'')]",
-                    "[concat('APPINSIGHTS_INSTRUMENTATIONKEY|',parameters('DaystoLoad'))]"
+                    "[concat('APPINSIGHTS_INSTRUMENTATIONKEY|',reference('deployAppInsights').outputs.aiKey.value,'')]"
                 ]
             }
           }
