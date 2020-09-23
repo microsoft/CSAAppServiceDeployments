@@ -1,25 +1,29 @@
 using System;
+using System.IO;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Azure.WebJobs;
+using Microsoft.Azure.WebJobs.Extensions.Http;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Runtime.CompilerServices;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Text.RegularExpressions;
-using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Host;
-using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using Microsoft.Rest;
-using Newtonsoft.Json;
 using System.Linq;
-using System.IO;
 using System.Data;
 using Microsoft.Azure.Services.AppAuthentication;
 
 namespace AzureCost_to_LogAnalytics
 {
-    public static class AzureCost_to_LogAnalytics
-    {//Environment.GetEnvironmentVariable("ClientId")
+    public static class PreLoadLogAnalytics
+    {
         private static string ClientId = Environment.GetEnvironmentVariable("ClientId");
         private static string ServicePrincipalPassword = Environment.GetEnvironmentVariable("ServicePrincipalPassword");
         private static string AzureTenantId = Environment.GetEnvironmentVariable("AzureTenantId");
@@ -27,6 +31,8 @@ namespace AzureCost_to_LogAnalytics
         private static string workspaceid = Environment.GetEnvironmentVariable("workspaceid");
         private static string workspacekey = Environment.GetEnvironmentVariable("workspacekey");
         private static string logName = Environment.GetEnvironmentVariable("logName");
+        private static double daystoload = Convert.ToDouble(Environment.GetEnvironmentVariable("daystoLoad"));
+
         public static string jsonResult { get; set; }
 
         private static string AuthToken { get; set; }
@@ -45,23 +51,25 @@ namespace AzureCost_to_LogAnalytics
             return result.Result.AccessToken;
         }
 
-        
-        [FunctionName("DailyCostLoad")]
-        public static async void Run([TimerTrigger("0 4 * * *")]TimerInfo myTimer, ILogger log)
+
+        [FunctionName("PreLoadLogAnalytics")]
+        public static async void Run(
+            [HttpTrigger(AuthorizationLevel.Function, "get", "post", Route = null)] HttpRequest req,
+            ILogger log)
         {
-            DateTime start = DateTime.Now.AddDays(-1);
+            DateTime time = DateTime.Now.AddDays(-1);
 
-            string time = start.ToString("MM/dd/yyyy");
-
+            string start = time.ToString("MM/dd/yyyy");
+            string end = time.AddDays(-daystoload).ToString("MM/dd/yyyy");
 
             log.LogInformation($"C# Timer trigger function executed at: {DateTime.Now}");
-            
+
             //AuthToken = GetAuthorizationToken();
             //TokenCredentials = new TokenCredentials(AuthToken);
 
             var azureServiceTokenProvider = new AzureServiceTokenProvider();
             string AuthToken = await azureServiceTokenProvider.GetAccessTokenAsync("https://management.azure.com/");
-            
+
             using (var client = new HttpClient())
             {
                 // Setting Authorization.  
@@ -121,8 +129,8 @@ namespace AzureCost_to_LogAnalytics
                     ]
                 },
                 'timePeriod': {
-                    'from': '" + time + @"',
-                    'to': '" + time + @"'
+                    'from': '" + end + @"',
+                    'to': '" + start + @"'
                 },
                 'timeframe': 'Custom',
                 'type': 'Usage'
@@ -141,9 +149,9 @@ namespace AzureCost_to_LogAnalytics
 
                     QueryResults result = Newtonsoft.Json.JsonConvert.DeserializeObject<QueryResults>(response.Content.ReadAsStringAsync().Result);
 
-                    
+
                     jsonResult = "[";
-                    for(int i = 0;i < result.properties.rows.Length;i++)
+                    for (int i = 0; i < result.properties.rows.Length; i++)
                     {
                         object[] row = result.properties.rows[i];
                         double cost = Convert.ToDouble(row[0]);
@@ -162,6 +170,6 @@ namespace AzureCost_to_LogAnalytics
                     logAnalytics.Post(jsonResult);
                 }
             }
-        }        
+        }
     }
 }

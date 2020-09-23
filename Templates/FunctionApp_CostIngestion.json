@@ -5,31 +5,27 @@
       "deploymentPrefix": {
         "type": "string",
         "defaultValue": "poc"
+      },
+      "DaystoLoad": {
+        "type": "string",
+        "defaultValue": "30",
+        "allowedValues": [
+          "1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24","25","26","27","28","29","30"
+        ]
       }
     },
     "variables": {
       "gitUri": "https://raw.githubusercontent.com/microsoft/CSANestedTemplates/main/Templates",
-      "deployKeyVaultAccessTemplate": "[concat(variables('gitUri'),'/KeyVaultAccessPolicy.json')]",
       "deployFunctionAppTemplate": "[concat(variables('gitUri'),'/ConsumptionFunctionApp.json')]",
-      "deployFunctionAppSettingsTemplate": "[concat(variables('gitUri'),'/WebAppSettings.json')]",
       "deployFunctionGitHubTemplate": "[concat(variables('gitUri'),'/WebAppSourceControl.json')]",
-      "deployKeyVaultTemplate": "[concat(variables('gitUri'),'/KeyVault.json')]",
-      "deployKeyVaultSecretTemplate": "[concat(variables('gitUri'),'/KeyVaultSecret.json')]",
       "deployLATemplateURL": "[concat(variables('gitUri'),'/Log_Analytics_Workspace.json')]",
       "deployAppInsightsURL": "[concat(variables('gitUri'),'/ApplicationInsights.json')]",
       "deployStorageAccountURL": "[concat(variables('gitUri'),'/StorageAccount.json')]",
       "laName": "[concat(parameters('deploymentPrefix'),'la',uniqueString(resourceGroup().name))]",
-      "keyVaultName": "[concat(parameters('deploymentPrefix'),'kv',uniqueString(resourceGroup().name))]",
       "appName": "[concat(parameters('deploymentPrefix'),'costingestionfa',uniqueString(resourceGroup().name))]",
       "appInsightsName": "[concat(parameters('deploymentPrefix'),'ai',uniqueString(resourceGroup().name))]",
       "saName": "[tolower(concat(parameters('deploymentPrefix'),'sa',uniqueString(resourceGroup().name)))]",
-      "appSettings": [
-          "AKS-SN|192.168.1.0/25|Enabled",
-          "Data-SN|192.168.1.176/28|Disabled",
-          "Shared-SN|192.168.1.160/28|Enabled",
-          "AzureBastionSubnet|192.168.1.128/28|Enabled",
-          "AppGW-SN|192.168.1.144/28|Enabled"
-      ]
+      
     },
     "resources": [
       {
@@ -97,7 +93,9 @@
         "type": "Microsoft.Resources/deployments",
         "apiVersion": "2018-05-01",
         "dependsOn": [
-            "deployStorageAccount"
+            "deployStorageAccount",
+            "deployLogAnalytics",
+            "deployAppInsights"
         ],
         "properties": {
           "mode": "Incremental",
@@ -109,11 +107,26 @@
             "appName": {
               "value": "[variables('appName')]"
             },
-            "saConnectionString": {
-                "value": "[reference('deployStorageAccount').outputs.saConnectionString.value]"
-            },
-            "runtime": {
-                "value": "dotnet"
+            "appSettings": {
+                "value": [
+                    "[concat('AzureWebJobsStorage|',reference('deployStorageAccount').outputs.saConnectionString.value,'')]",
+                    "[concat('AzureWebJobsDashboard|',reference('deployStorageAccount').outputs.saConnectionString.value,'')]",
+                    "[concat('WEBSITE_CONTENTAZUREFILECONNECTIONSTRING|',reference('deployStorageAccount').outputs.saConnectionString.value,'')]",
+                    "[concat('WEBSITE_CONTENTSHARE|', toLower(variables('appName')),'')]",
+                    "ServicePrincipalPassword|@Microsoft.KeyVault(SecretUri=https://labvaultwb.vault.azure.net/secrets/CostSPPwd/63d3c679344a44d8bdf5af535459fc0c)",
+                    "FUNCTIONS_EXTENSION_VERSION|~3",
+                    "WEBSITE_NODE_DEFAULT_VERSION|~10",
+                    "FUNCTIONS_WORKER_RUNTIME|dotnet",
+                    "WEBSITE_RUN_FROM_PACKAGE|1",
+                    "AzureTenantId|72f988bf-86f1-41af-91ab-2d7cd011db47",
+                    "ClientId|9d34d826-24a6-4572-bfad-99328ade396b",
+                    "logName|AzureCostAnamolies",
+                    "scope|subscriptions/5f1c1322-cebc-4ea3-8779-fac7d666e18f",
+                    "[concat('workspaceid|',reference('deployLogAnalytics').outputs.workspaceId.value,'')]",
+                    "[concat('workspacekey|',reference('deployLogAnalytics').outputs.workspaceKey.value,'')]",
+                    "[concat('APPINSIGHTS_INSTRUMENTATIONKEY|',reference('deployAppInsights').outputs.aiKey.value,'')]",
+                    "[concat('APPINSIGHTS_INSTRUMENTATIONKEY|',parameters('DaystoLoad'))]"
+                ]
             }
           }
         }
@@ -135,11 +148,8 @@
             "appName": {
               "value": "[variables('appName')]"
             },
-            "repositoryURL": {
-                "value": "https://github.com/microsoft/CSAAppServiceDeployments"
-            },
-            "branch": {
-                "value": "dev"
+            "packageUri": {
+                "value": "https://raw.githubusercontent.com/microsoft/CSAAppServiceDeployments/dev/publish.zip"
             }
           }
         }
