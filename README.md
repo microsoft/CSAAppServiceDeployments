@@ -19,7 +19,7 @@ This architecture is made of of the following resources:
 - Azure Application Insights  
 - Azure Storage Account  
 
-<img src="./images/AzureCostAnomalies.jpg" alt="Environment"  Width="900">  
+<img src="./images/AzureCostAnomalies.jpg" alt="Environment"  Width="600">  
 
 ### Deploy to Azure  
 
@@ -89,16 +89,16 @@ We pass in the Application Settings for the Function using an array formated lik
         "name|value"
     ]  
 
-Below are the most important settings for our Function:  
-    AzureWebJobsStorage = connection string to the storage account  
-    AzureWebJobDashboard = connection string to the storage account  
-    WEBSITE_CONTENTAZUREFILECONNECTIONSTRING = connection string to the storage account  
-    WEBSITE_CONTENTSHARE = connection string to the storage account  
-    logName = Name of the log to be created in Log Analytics
-    scope = Comma seperated list of scope you want to query for Cost Data  
-    workspaceid = Log Analytics workspaceid to store the data  
-    workspacekey = Key for the log analytics workspace  
-    APPINSIGHTS_INSTRUMENTATIONKEY = Application Insights instrumentation key  
+Below are the most important settings for our Function:    
+    - AzureWebJobsStorage = connection string to the storage account  
+    - AzureWebJobDashboard = connection string to the storage account  
+    - WEBSITE_CONTENTAZUREFILECONNECTIONSTRING = connection string to the storage account  
+    - WEBSITE_CONTENTSHARE = connection string to the storage account  
+    - logName = Name of the log to be created in Log Analytics
+    - scope = Comma seperated list of scope you want to query for Cost Data  
+    - workspaceid = Log Analytics workspaceid to store the data  
+    - workspacekey = Key for the log analytics workspace  
+    - APPINSIGHTS_INSTRUMENTATIONKEY = Application Insights instrumentation key  
 
 Below are the values we provide in the template:  
 
