@@ -43,7 +43,7 @@ Only one parameter is required. The **deploymentPrefix** is used to name the res
 | :------------- | :----------: | -----------: |
 |  deploymentPrefix | Prefix value for naming resources   | POC    |   
 
-[![Deploy](images/deploytoazure.svg?sanitize=true)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fmicrosoft%2FCSAAppServiceDeployments%2Fdev%2Ftemplates%2FFunctionApp_CostIngestion.json)  
+[![Deploy](images/deploytoazure.svg?sanitize=true)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fmicrosoft%2FCSAAppServiceDeployments%2Fdev%2FTemplates%2FFunctionApp_CostIngestion.json)  
 
 
 ### Deployment Details  
