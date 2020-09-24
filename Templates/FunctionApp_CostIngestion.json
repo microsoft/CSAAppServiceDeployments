@@ -17,8 +17,7 @@
       "laName": "[concat(parameters('deploymentPrefix'),'la',uniqueString(resourceGroup().name))]",
       "appName": "[concat(parameters('deploymentPrefix'),'costingestionfa',uniqueString(resourceGroup().name))]",
       "appInsightsName": "[concat(parameters('deploymentPrefix'),'ai',uniqueString(resourceGroup().name))]",
-      "saName": "[tolower(concat(parameters('deploymentPrefix'),'sa',uniqueString(resourceGroup().name)))]",
-      
+      "saName": "[tolower(concat(parameters('deploymentPrefix'),'sa',uniqueString(resourceGroup().name)))]"      
     },
     "resources": [
       {
