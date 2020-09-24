@@ -24,32 +24,12 @@ namespace AzureCost_to_LogAnalytics
 {
     public static class PreLoadLogAnalytics
     {
-        private static string ClientId = Environment.GetEnvironmentVariable("ClientId");
-        private static string ServicePrincipalPassword = Environment.GetEnvironmentVariable("ServicePrincipalPassword");
-        private static string AzureTenantId = Environment.GetEnvironmentVariable("AzureTenantId");
         private static string[] scopes = (Environment.GetEnvironmentVariable("scope")).Split(',');
         private static string workspaceid = Environment.GetEnvironmentVariable("workspaceid");
         private static string workspacekey = Environment.GetEnvironmentVariable("workspacekey");
         private static string logName = Environment.GetEnvironmentVariable("logName");
         
         public static string jsonResult { get; set; }
-
-        private static string AuthToken { get; set; }
-        private static TokenCredentials TokenCredentials { get; set; }
-
-        private static string GetAuthorizationToken()
-        {
-            ClientCredential cc = new ClientCredential(ClientId, ServicePrincipalPassword);
-            var context = new AuthenticationContext("https://login.windows.net/" + AzureTenantId);
-            var result = context.AcquireTokenAsync("https://management.azure.com/", cc);
-            if (result == null)
-            {
-                throw new InvalidOperationException("Failed to obtain the JWT token");
-            }
-
-            return result.Result.AccessToken;
-        }
-
 
         [FunctionName("PreLoadLogAnalytics")]
         public static async void Run(
@@ -63,9 +43,6 @@ namespace AzureCost_to_LogAnalytics
             string end = time.AddDays(-daystoload).ToString("MM/dd/yyyy");
 
             log.LogInformation($"C# Timer trigger function executed at: {DateTime.Now}");
-
-            //AuthToken = GetAuthorizationToken();
-            //TokenCredentials = new TokenCredentials(AuthToken);
 
             var azureServiceTokenProvider = new AzureServiceTokenProvider();
             string AuthToken = await azureServiceTokenProvider.GetAccessTokenAsync("https://management.azure.com/");
@@ -125,6 +102,10 @@ namespace AzureCost_to_LogAnalytics
                         {
                             'name': 'ServiceTier',
                             'type': 'dimension'
+                        },
+                        {
+                            'name': 'ResourceGroup',
+                            'type': 'dimension'
                         }
                     ]
                 },
@@ -158,16 +139,18 @@ namespace AzureCost_to_LogAnalytics
 
                         if (i == 0)
                         {
-                            jsonResult += $"{{\"PreTaxCost\": {cost},\"Date\": \"{row[1]}\",\"ResourceId\": \"{row[2]}\",\"ResourceType\": \"{row[3]}\",\"Meter\": \"{row[4]}\",\"MeterCategory\": \"{row[5]}\",\"MeterSubcategory\": \"{row[6]}\",\"SubscriptionName\": \"{row[7]}\",\"ServiceName\": \"{row[8]}\",\"ServiceTier\": \"{row[9]}\"}}";
+                            jsonResult += $"{{\"PreTaxCost\": {cost},\"Date\": \"{row[1]}\",\"ResourceId\": \"{row[2]}\",\"ResourceType\": \"{row[3]}\",\"Meter\": \"{row[4]}\",\"MeterCategory\": \"{row[5]}\",\"MeterSubcategory\": \"{row[6]}\",\"SubscriptionName\": \"{row[7]}\",\"ServiceName\": \"{row[8]}\",\"ServiceTier\": \"{row[9]}\",\"ResourceGroup\": \"{row[10]}\"}}";
                         }
                         else
                         {
-                            jsonResult += $",{{\"PreTaxCost\": {cost},\"Date\": \"{row[1]}\",\"ResourceId\": \"{row[2]}\",\"ResourceType\": \"{row[3]}\",\"Meter\": \"{row[4]}\",\"MeterCategory\": \"{row[5]}\",\"MeterSubcategory\": \"{row[6]}\",\"SubscriptionName\": \"{row[7]}\",\"ServiceName\": \"{row[8]}\",\"ServiceTier\": \"{row[9]}\"}}";
+                            jsonResult += $",{{\"PreTaxCost\": {cost},\"Date\": \"{row[1]}\",\"ResourceId\": \"{row[2]}\",\"ResourceType\": \"{row[3]}\",\"Meter\": \"{row[4]}\",\"MeterCategory\": \"{row[5]}\",\"MeterSubcategory\": \"{row[6]}\",\"SubscriptionName\": \"{row[7]}\",\"ServiceName\": \"{row[8]}\",\"ServiceTier\": \"{row[9]}\",\"ResourceGroup\": \"{row[10]}\"}}";
                         }
                     }
 
                     jsonResult += "]";
                     logAnalytics.Post(jsonResult);
+
+
                 }
             }
         }
