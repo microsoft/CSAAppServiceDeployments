@@ -141,7 +141,7 @@
               "value": "[variables('appName')]"
             },
             "packageUri": {
-                "value": "https://raw.githubusercontent.com/microsoft/CSAAppServiceDeployments.git"
+                "value": "https://github.com/microsoft/CSAAppServiceDeployments.git"
             },
             "packageBranch": {
               "value": "dev"
