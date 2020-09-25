@@ -147,7 +147,7 @@
                 "value": "https://github.com/microsoft/CSAAppServiceDeployments.git"
             },
             "packageBranch": {
-              "value": "dev"
+              "value": "main"
             }
           }
         }
