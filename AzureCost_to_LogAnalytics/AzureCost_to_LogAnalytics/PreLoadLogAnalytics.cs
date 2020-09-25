@@ -38,10 +38,10 @@ namespace AzureCost_to_LogAnalytics
         {
             DateTime time = DateTime.Now.AddDays(-1);
 
-            double daystoload = Convert.ToDouble(req.Query["days"]);
             string start = time.ToString("MM/dd/yyyy");
-            string end = time.AddDays(-daystoload).ToString("MM/dd/yyyy");
-            Console.WriteLine($"Start: {start}  End: {end}");
+            string end = time.AddDays(-30).ToString("MM/dd/yyyy");
+
+            log.LogInformation($"Start: {start}, End: {end}");
             log.LogInformation($"C# Timer trigger function executed at: {DateTime.Now}");
 
             var azureServiceTokenProvider = new AzureServiceTokenProvider();
