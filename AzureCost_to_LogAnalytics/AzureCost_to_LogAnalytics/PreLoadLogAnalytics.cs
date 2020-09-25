@@ -41,7 +41,7 @@ namespace AzureCost_to_LogAnalytics
             double daystoload = Convert.ToDouble(req.Query["days"]);
             string start = time.ToString("MM/dd/yyyy");
             string end = time.AddDays(-daystoload).ToString("MM/dd/yyyy");
-
+            Console.WriteLine($"Start: {start}  End: {end}");
             log.LogInformation($"C# Timer trigger function executed at: {DateTime.Now}");
 
             var azureServiceTokenProvider = new AzureServiceTokenProvider();
@@ -117,6 +117,7 @@ namespace AzureCost_to_LogAnalytics
                 'type': 'Usage'
             }";
 
+                Console.WriteLine(myJson);
                 AzureLogAnalytics logAnalytics = new AzureLogAnalytics(
                     workspaceId: $"{workspaceid}",
                     sharedKey: $"{workspacekey}",
