@@ -36,12 +36,7 @@ namespace AzureCost_to_LogAnalytics
             [HttpTrigger(AuthorizationLevel.Function, "get", "post", Route = null)] HttpRequest req,
             ILogger log)
         {
-            DateTime time = DateTime.Now.AddDays(-1);
-
-            string start = time.ToString("MM/dd/yyyy");
-            string end = time.AddDays(-30).ToString("MM/dd/yyyy");
-
-            log.LogInformation($"Start: {start}, End: {end}");
+            
             log.LogInformation($"C# Timer trigger function executed at: {DateTime.Now}");
 
             var azureServiceTokenProvider = new AzureServiceTokenProvider();
@@ -61,95 +56,100 @@ namespace AzureCost_to_LogAnalytics
                 // Initialization.  
                 HttpResponseMessage response = new HttpResponseMessage();
 
-                string myJson = @"{
-                    'dataset': {
-                        'aggregation': {
-                        'totalCost': {
-                            'function': 'Sum',
-                            'name': 'PreTaxCost'
-                        }
+                for(int j=1;j<31; j++) {
+                    DateTime time = DateTime.Now.AddDays(-j);
+
+                    string start = time.ToString("MM/dd/yyyy");
+                    
+                    string myJson = @"{
+                        'dataset': {
+                            'aggregation': {
+                            'totalCost': {
+                                'function': 'Sum',
+                                'name': 'PreTaxCost'
+                            }
+                        },
+                        'granularity': 'Daily',
+                        'grouping': [
+                            {
+                                'name': 'ResourceId',
+                                'type': 'Dimension'
+                            },
+                            {
+                                'name': 'ResourceType',
+                                'type': 'dimension'
+                            },
+                            {
+                                'name': 'Meter',
+                                'type': 'dimension'
+                            },
+                            {
+                                'name': 'MeterCategory',
+                                'type': 'dimension'
+                            },
+                            {
+                                'name': 'MeterSubcategory',
+                                'type': 'dimension'
+                            },
+                            {
+                                'name': 'SubscriptionName',
+                                'type': 'dimension'
+                            },
+                            {
+                                'name': 'ServiceName',
+                                'type': 'dimension'
+                            },
+                            {
+                                'name': 'ServiceTier',
+                                'type': 'dimension'
+                            },
+                            {
+                                'name': 'ResourceGroup',
+                                'type': 'dimension'
+                            }
+                        ]
                     },
-                    'granularity': 'Daily',
-                    'grouping': [
-                        {
-                            'name': 'ResourceId',
-                            'type': 'Dimension'
-                        },
-                        {
-                            'name': 'ResourceType',
-                            'type': 'dimension'
-                        },
-                        {
-                            'name': 'Meter',
-                            'type': 'dimension'
-                        },
-                        {
-                            'name': 'MeterCategory',
-                            'type': 'dimension'
-                        },
-                        {
-                            'name': 'MeterSubcategory',
-                            'type': 'dimension'
-                        },
-                        {
-                            'name': 'SubscriptionName',
-                            'type': 'dimension'
-                        },
-                        {
-                            'name': 'ServiceName',
-                            'type': 'dimension'
-                        },
-                        {
-                            'name': 'ServiceTier',
-                            'type': 'dimension'
-                        },
-                        {
-                            'name': 'ResourceGroup',
-                            'type': 'dimension'
-                        }
-                    ]
-                },
-                'timePeriod': {
-                    'from': '" + end + @"',
-                    'to': '" + start + @"'
-                },
-                'timeframe': 'Custom',
-                'type': 'Usage'
-            }";
+                    'timePeriod': {
+                        'from': '" + start + @"',
+                        'to': '" + start + @"'
+                    },
+                    'timeframe': 'Custom',
+                    'type': 'Usage'
+                }";
 
-                Console.WriteLine(myJson);
-                AzureLogAnalytics logAnalytics = new AzureLogAnalytics(
-                    workspaceId: $"{workspaceid}",
-                    sharedKey: $"{workspacekey}",
-                    logType: $"{logName}");
+                    AzureLogAnalytics logAnalytics = new AzureLogAnalytics(
+                        workspaceId: $"{workspaceid}",
+                        sharedKey: $"{workspacekey}",
+                        logType: $"{logName}");
 
-                foreach (string scope in scopes)
-                {
-                    Console.WriteLine(scope);
-                    // HTTP Post
-                    response = await client.PostAsync("/" + scope + "/providers/Microsoft.CostManagement/query?api-version=2019-11-01", new StringContent(myJson, Encoding.UTF8, "application/json"));
-
-                    QueryResults result = Newtonsoft.Json.JsonConvert.DeserializeObject<QueryResults>(response.Content.ReadAsStringAsync().Result);
-
-
-                    jsonResult = "[";
-                    for (int i = 0; i < result.properties.rows.Length; i++)
+                    foreach (string scope in scopes)
                     {
-                        object[] row = result.properties.rows[i];
-                        double cost = Convert.ToDouble(row[0]);
+                        Console.WriteLine(scope);
+                        // HTTP Post
+                        response = await client.PostAsync("/" + scope + "/providers/Microsoft.CostManagement/query?api-version=2019-11-01", new StringContent(myJson, Encoding.UTF8, "application/json"));
 
-                        if (i == 0)
+                        QueryResults result = Newtonsoft.Json.JsonConvert.DeserializeObject<QueryResults>(response.Content.ReadAsStringAsync().Result);
+
+
+                        jsonResult = "[";
+                        for (int i = 0; i < result.properties.rows.Length; i++)
                         {
-                            jsonResult += $"{{\"PreTaxCost\": {cost},\"Date\": \"{row[1]}\",\"ResourceId\": \"{row[2]}\",\"ResourceType\": \"{row[3]}\",\"Meter\": \"{row[4]}\",\"MeterCategory\": \"{row[5]}\",\"MeterSubcategory\": \"{row[6]}\",\"SubscriptionName\": \"{row[7]}\",\"ServiceName\": \"{row[8]}\",\"ServiceTier\": \"{row[9]}\",\"ResourceGroup\": \"{row[10]}\"}}";
+                            object[] row = result.properties.rows[i];
+                            double cost = Convert.ToDouble(row[0]);
+
+                            if (i == 0)
+                            {
+                                jsonResult += $"{{\"PreTaxCost\": {cost},\"Date\": \"{row[1]}\",\"ResourceId\": \"{row[2]}\",\"ResourceType\": \"{row[3]}\",\"Meter\": \"{row[4]}\",\"MeterCategory\": \"{row[5]}\",\"MeterSubcategory\": \"{row[6]}\",\"SubscriptionName\": \"{row[7]}\",\"ServiceName\": \"{row[8]}\",\"ServiceTier\": \"{row[9]}\",\"ResourceGroup\": \"{row[10]}\"}}";
+                            }
+                            else
+                            {
+                                jsonResult += $",{{\"PreTaxCost\": {cost},\"Date\": \"{row[1]}\",\"ResourceId\": \"{row[2]}\",\"ResourceType\": \"{row[3]}\",\"Meter\": \"{row[4]}\",\"MeterCategory\": \"{row[5]}\",\"MeterSubcategory\": \"{row[6]}\",\"SubscriptionName\": \"{row[7]}\",\"ServiceName\": \"{row[8]}\",\"ServiceTier\": \"{row[9]}\",\"ResourceGroup\": \"{row[10]}\"}}";
+                            }
                         }
-                        else
-                        {
-                            jsonResult += $",{{\"PreTaxCost\": {cost},\"Date\": \"{row[1]}\",\"ResourceId\": \"{row[2]}\",\"ResourceType\": \"{row[3]}\",\"Meter\": \"{row[4]}\",\"MeterCategory\": \"{row[5]}\",\"MeterSubcategory\": \"{row[6]}\",\"SubscriptionName\": \"{row[7]}\",\"ServiceName\": \"{row[8]}\",\"ServiceTier\": \"{row[9]}\",\"ResourceGroup\": \"{row[10]}\"}}";
-                        }
+
+                        jsonResult += "]";
+                        logAnalytics.Post(jsonResult);
                     }
-
-                    jsonResult += "]";
-                    logAnalytics.Post(jsonResult);
 
 
                 }
