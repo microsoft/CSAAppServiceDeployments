@@ -29,10 +29,9 @@ After deploying this solution you have to give the App Service System Assigned M
 If you want to load historical data into Log Analytics you can utilize the function named **PreLoadLogAnalytics**.  
 
 1) Get the function url by opening the Function and clicking on **Get Function URL**. Note that it may take a little bit to light up.  
-2) At the end of the function url you need to add the number of days to load by appending **&days=30** 
-3) Use a tool like PostMan or Curl to send the request. Below is an example using curl.
+2) Use a tool like PostMan or Curl to send the request. Below is an example using curl.
 
-**curl 'https://poccostingestionfadhr2puxbmgliy.azurewebsites.net/api/PreLoadLogAnalytics?code=ichangedthisstring&days=30'**
+**curl 'https://poccostingestionfadhr2puxbmgliy.azurewebsites.net/api/PreLoadLogAnalytics?code=ichangedthisstring'**
 
 #### Deploying Solution
 Use the below link to deploy this solution to Azure. ***Note*** Make sure you follow the **Post Deployment Steps** after completing the deployment.
