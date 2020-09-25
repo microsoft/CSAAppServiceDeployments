@@ -5,6 +5,12 @@
       "deploymentPrefix": {
         "type": "string",
         "defaultValue": "poc"
+      },
+      "scope": {
+        "type": "string",
+        "metadata": {
+          "description": "Scope for the cost api query (comma seperated for multiple). ex: subscriptions/5f1c1322-cebc-4ea3-8779-fac7d666e18f"
+        }
       }
     },
     "variables": {
@@ -110,10 +116,8 @@
                     "WEBSITE_NODE_DEFAULT_VERSION|~10",
                     "FUNCTIONS_WORKER_RUNTIME|dotnet",
                     "WEBSITE_RUN_FROM_PACKAGE|0",
-                    "AzureTenantId|72f988bf-86f1-41af-91ab-2d7cd011db47",
-                    "ClientId|9d34d826-24a6-4572-bfad-99328ade396b",
                     "logName|AzureCostAnamolies",
-                    "scope|subscriptions/5f1c1322-cebc-4ea3-8779-fac7d666e18f",
+                    "[concat('scope|',parameters('scope'),'')]",
                     "[concat('workspaceid|',reference('deployLogAnalytics').outputs.customerId.value,'')]",
                     "[concat('workspacekey|',reference('deployLogAnalytics').outputs.workspaceKey.value,'')]",
                     "[concat('APPINSIGHTS_INSTRUMENTATIONKEY|',reference('deployAppInsights').outputs.aiKey.value,'')]"

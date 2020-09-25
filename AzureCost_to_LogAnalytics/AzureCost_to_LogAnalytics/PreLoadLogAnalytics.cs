@@ -80,27 +80,7 @@ namespace AzureCost_to_LogAnalytics
                                 'type': 'dimension'
                             },
                             {
-                                'name': 'Meter',
-                                'type': 'dimension'
-                            },
-                            {
-                                'name': 'MeterCategory',
-                                'type': 'dimension'
-                            },
-                            {
-                                'name': 'MeterSubcategory',
-                                'type': 'dimension'
-                            },
-                            {
                                 'name': 'SubscriptionName',
-                                'type': 'dimension'
-                            },
-                            {
-                                'name': 'ServiceName',
-                                'type': 'dimension'
-                            },
-                            {
-                                'name': 'ServiceTier',
                                 'type': 'dimension'
                             },
                             {
@@ -139,11 +119,11 @@ namespace AzureCost_to_LogAnalytics
 
                             if (i == 0)
                             {
-                                jsonResult += $"{{\"PreTaxCost\": {cost},\"Date\": \"{row[1]}\",\"ResourceId\": \"{row[2]}\",\"ResourceType\": \"{row[3]}\",\"Meter\": \"{row[4]}\",\"MeterCategory\": \"{row[5]}\",\"MeterSubcategory\": \"{row[6]}\",\"SubscriptionName\": \"{row[7]}\",\"ServiceName\": \"{row[8]}\",\"ServiceTier\": \"{row[9]}\",\"ResourceGroup\": \"{row[10]}\"}}";
+                                jsonResult += $"{{\"PreTaxCost\": {cost},\"Date\": \"{row[1]}\",\"ResourceId\": \"{row[2]}\",\"ResourceType\": \"{row[3]}\",\"SubscriptionName\": \"{row[4]}\",\"ResourceGroup\": \"{row[5]}\"}}";
                             }
                             else
                             {
-                                jsonResult += $",{{\"PreTaxCost\": {cost},\"Date\": \"{row[1]}\",\"ResourceId\": \"{row[2]}\",\"ResourceType\": \"{row[3]}\",\"Meter\": \"{row[4]}\",\"MeterCategory\": \"{row[5]}\",\"MeterSubcategory\": \"{row[6]}\",\"SubscriptionName\": \"{row[7]}\",\"ServiceName\": \"{row[8]}\",\"ServiceTier\": \"{row[9]}\",\"ResourceGroup\": \"{row[10]}\"}}";
+                                jsonResult += $",{{\"PreTaxCost\": {cost},\"Date\": \"{row[1]}\",\"ResourceId\": \"{row[2]}\",\"ResourceType\": \"{row[3]}\",\"SubscriptionName\": \"{row[4]}\",\"ResourceGroup\": \"{row[5]}\"}}";
                             }
                         }
 
