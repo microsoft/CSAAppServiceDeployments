@@ -32,7 +32,7 @@ namespace AzureCost_to_LogAnalytics
         public static string jsonResult { get; set; }
 
         [FunctionName("PreLoadLogAnalytics")]
-        public static async void Run(
+        public static async Task<IActionResult> Run(
             [HttpTrigger(AuthorizationLevel.Function, "get", "post", Route = null)] HttpRequest req,
             ILogger log)
         {
@@ -107,7 +107,7 @@ namespace AzureCost_to_LogAnalytics
 
                     foreach (string scope in scopes)
                     {
-                        Console.WriteLine(scope);
+                        log.LogInformation($"Scope: {scope}");
                         // HTTP Post
                         response = await client.PostAsync("/" + scope + "/providers/Microsoft.CostManagement/query?api-version=2019-11-01", new StringContent(myJson, Encoding.UTF8, "application/json"));
 
@@ -134,10 +134,12 @@ namespace AzureCost_to_LogAnalytics
 
                         log.LogInformation($"Cost Data: {jsonResult}");
                         logAnalytics.Post(jsonResult);
+
+                        //return new OkObjectResult(jsonResult);
                     }
 
-
                 }
+                return new OkObjectResult(jsonResult);
             }
         }
     }
