@@ -29,21 +29,20 @@ After deploying this solution you have to give the App Service System Assigned M
 If you want to load historical data into Log Analytics you can utilize the function named **PreLoadLogAnalytics**.  
 
 1) Get the function url by opening the Function and clicking on **Get Function URL**. Note that it may take a little bit to light up.  
-2) At the end of the function url you need to add the number of days to load by appending **&days=30** 
-3) Use a tool like PostMan or Curl to send the request. Below is an example using curl.
+2) Use a tool like PostMan or Curl to send the request. Below is an example using curl.
 
-**curl 'https://poccostingestionfadhr2puxbmgliy.azurewebsites.net/api/PreLoadLogAnalytics?code=ichangedthisstring&days=30'**
+**curl 'https://poccostingestionfadhr2puxbmgliy.azurewebsites.net/api/PreLoadLogAnalytics?code=ichangedthisstring'**
 
 #### Deploying Solution
 Use the below link to deploy this solution to Azure. ***Note*** Make sure you follow the **Post Deployment Steps** after completing the deployment.
 
-Only one parameter is required. The **deploymentPrefix** is used to name the resources deployed with a unique string appended to them:  
+**Note** There are two parameters that you need to supply:  
+1) deploymentPrefix: this will prefix the name of all the resources created.  
+2) scope: this defines the scope or scopes for the Cost Management API. 
+    - ex: subscriptions/5f1c1322-cebc-4ea3-8779-fac7d666e18f
+    - ex: subscriptions/5f1c1322-cebc-4ea3-8779-fac7d666e18f, subscriptions/718c1322-cebc-4ea3-8779-fac7d666e18f  
 
-| Name       | Description     | Example     |
-| :------------- | :----------: | -----------: |
-|  deploymentPrefix | Prefix value for naming resources   | POC    |   
-
-[![Deploy](images/deploytoazure.svg?sanitize=true)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fmicrosoft%2FCSAAppServiceDeployments%2Fdev%2FTemplates%2FFunctionApp_CostIngestion.json)  
+[![Deploy](images/deploytoazure.svg?sanitize=true)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fmicrosoft%2FCSAAppServiceDeployments%2Fmain%2FTemplates%2FFunctionApp_CostIngestion.json)  
 
 
 ### Deployment Details  

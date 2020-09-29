@@ -76,27 +76,7 @@ namespace AzureCost_to_LogAnalytics
                             'type': 'dimension'
                         },
                         {
-                            'name': 'Meter',
-                            'type': 'dimension'
-                        },
-                        {
-                            'name': 'MeterCategory',
-                            'type': 'dimension'
-                        },
-                        {
-                            'name': 'MeterSubcategory',
-                            'type': 'dimension'
-                        },
-                        {
                             'name': 'SubscriptionName',
-                            'type': 'dimension'
-                        },
-                        {
-                            'name': 'ServiceName',
-                            'type': 'dimension'
-                        },
-                        {
-                            'name': 'ServiceTier',
                             'type': 'dimension'
                         },
                         {

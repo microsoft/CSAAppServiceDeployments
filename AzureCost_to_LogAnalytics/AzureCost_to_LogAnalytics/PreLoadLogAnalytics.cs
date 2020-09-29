@@ -32,7 +32,7 @@ namespace AzureCost_to_LogAnalytics
         public static string jsonResult { get; set; }
 
         [FunctionName("PreLoadLogAnalytics")]
-        public static async void Run(
+        public static async Task<IActionResult> Run(
             [HttpTrigger(AuthorizationLevel.Function, "get", "post", Route = null)] HttpRequest req,
             ILogger log)
         {
@@ -57,6 +57,7 @@ namespace AzureCost_to_LogAnalytics
                 HttpResponseMessage response = new HttpResponseMessage();
 
                 for(int j=1;j<31; j++) {
+                    log.LogInformation($"Inside Loop: {j}");
                     DateTime time = DateTime.Now.AddDays(-j);
 
                     string start = time.ToString("MM/dd/yyyy");
@@ -80,27 +81,7 @@ namespace AzureCost_to_LogAnalytics
                                 'type': 'dimension'
                             },
                             {
-                                'name': 'Meter',
-                                'type': 'dimension'
-                            },
-                            {
-                                'name': 'MeterCategory',
-                                'type': 'dimension'
-                            },
-                            {
-                                'name': 'MeterSubcategory',
-                                'type': 'dimension'
-                            },
-                            {
                                 'name': 'SubscriptionName',
-                                'type': 'dimension'
-                            },
-                            {
-                                'name': 'ServiceName',
-                                'type': 'dimension'
-                            },
-                            {
-                                'name': 'ServiceTier',
                                 'type': 'dimension'
                             },
                             {
@@ -117,6 +98,8 @@ namespace AzureCost_to_LogAnalytics
                     'type': 'Usage'
                 }";
 
+                    log.LogInformation($"Cost Query: {myJson}");
+
                     AzureLogAnalytics logAnalytics = new AzureLogAnalytics(
                         workspaceId: $"{workspaceid}",
                         sharedKey: $"{workspacekey}",
@@ -124,7 +107,7 @@ namespace AzureCost_to_LogAnalytics
 
                     foreach (string scope in scopes)
                     {
-                        Console.WriteLine(scope);
+                        log.LogInformation($"Scope: {scope}");
                         // HTTP Post
                         response = await client.PostAsync("/" + scope + "/providers/Microsoft.CostManagement/query?api-version=2019-11-01", new StringContent(myJson, Encoding.UTF8, "application/json"));
 
@@ -139,20 +122,24 @@ namespace AzureCost_to_LogAnalytics
 
                             if (i == 0)
                             {
-                                jsonResult += $"{{\"PreTaxCost\": {cost},\"Date\": \"{row[1]}\",\"ResourceId\": \"{row[2]}\",\"ResourceType\": \"{row[3]}\",\"Meter\": \"{row[4]}\",\"MeterCategory\": \"{row[5]}\",\"MeterSubcategory\": \"{row[6]}\",\"SubscriptionName\": \"{row[7]}\",\"ServiceName\": \"{row[8]}\",\"ServiceTier\": \"{row[9]}\",\"ResourceGroup\": \"{row[10]}\"}}";
+                                jsonResult += $"{{\"PreTaxCost\": {cost},\"Date\": \"{row[1]}\",\"ResourceId\": \"{row[2]}\",\"ResourceType\": \"{row[3]}\",\"SubscriptionName\": \"{row[4]}\",\"ResourceGroup\": \"{row[5]}\"}}";
                             }
                             else
                             {
-                                jsonResult += $",{{\"PreTaxCost\": {cost},\"Date\": \"{row[1]}\",\"ResourceId\": \"{row[2]}\",\"ResourceType\": \"{row[3]}\",\"Meter\": \"{row[4]}\",\"MeterCategory\": \"{row[5]}\",\"MeterSubcategory\": \"{row[6]}\",\"SubscriptionName\": \"{row[7]}\",\"ServiceName\": \"{row[8]}\",\"ServiceTier\": \"{row[9]}\",\"ResourceGroup\": \"{row[10]}\"}}";
+                                jsonResult += $",{{\"PreTaxCost\": {cost},\"Date\": \"{row[1]}\",\"ResourceId\": \"{row[2]}\",\"ResourceType\": \"{row[3]}\",\"SubscriptionName\": \"{row[4]}\",\"ResourceGroup\": \"{row[5]}\"}}";
                             }
                         }
 
                         jsonResult += "]";
+
+                        log.LogInformation($"Cost Data: {jsonResult}");
                         logAnalytics.Post(jsonResult);
+
+                        //return new OkObjectResult(jsonResult);
                     }
 
-
                 }
+                return new OkObjectResult(jsonResult);
             }
         }
     }
