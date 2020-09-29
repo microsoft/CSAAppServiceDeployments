@@ -97,6 +97,8 @@ namespace AzureCost_to_LogAnalytics
                     'type': 'Usage'
                 }";
 
+                    log.LogInformation($"Cost Query: {myJson}");
+
                     AzureLogAnalytics logAnalytics = new AzureLogAnalytics(
                         workspaceId: $"{workspaceid}",
                         sharedKey: $"{workspacekey}",
@@ -128,6 +130,8 @@ namespace AzureCost_to_LogAnalytics
                         }
 
                         jsonResult += "]";
+
+                        log.LogInformation($"Cost Data: {jsonResult}");
                         logAnalytics.Post(jsonResult);
                     }
 
