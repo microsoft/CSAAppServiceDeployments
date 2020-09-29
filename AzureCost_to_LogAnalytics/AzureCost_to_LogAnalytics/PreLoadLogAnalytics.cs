@@ -57,6 +57,7 @@ namespace AzureCost_to_LogAnalytics
                 HttpResponseMessage response = new HttpResponseMessage();
 
                 for(int j=1;j<31; j++) {
+                    log.LogInformation($"Inside Loop: {j}");
                     DateTime time = DateTime.Now.AddDays(-j);
 
                     string start = time.ToString("MM/dd/yyyy");
