@@ -31,7 +31,7 @@ namespace AzureCost_to_LogAnalytics
 
          
         [FunctionName("DailyCostLoad")]
-        public static async void Run([TimerTrigger("0 30 4 * * *")]TimerInfo myTimer, ILogger log)
+        public static async void Run([TimerTrigger("0 1 * * *")]TimerInfo myTimer, ILogger log)
         {
             DateTime start = DateTime.Now.AddDays(-1);
 
@@ -92,7 +92,7 @@ namespace AzureCost_to_LogAnalytics
                 'timeframe': 'Custom',
                 'type': 'Usage'
             }";
-
+                Console.WriteLine(myJson);
                 AzureLogAnalytics logAnalytics = new AzureLogAnalytics(
                     workspaceId: $"{workspaceid}",
                     sharedKey: $"{workspacekey}",
@@ -115,11 +115,11 @@ namespace AzureCost_to_LogAnalytics
 
                         if (i == 0)
                         {
-                            jsonResult += $"{{\"PreTaxCost\": {cost},\"Date\": \"{row[1]}\",\"ResourceId\": \"{row[2]}\",\"ResourceType\": \"{row[3]}\",\"Meter\": \"{row[4]}\",\"MeterCategory\": \"{row[5]}\",\"MeterSubcategory\": \"{row[6]}\",\"SubscriptionName\": \"{row[7]}\",\"ServiceName\": \"{row[8]}\",\"ServiceTier\": \"{row[9]}\",\"ResourceGroup\": \"{row[10]}\"}}";
+                            jsonResult += $"{{\"PreTaxCost\": {cost},\"Date\": \"{row[1]}\",\"ResourceId\": \"{row[2]}\",\"ResourceType\": \"{row[3]}\",\"SubscriptionName\": \"{row[4]}\",\"ResourceGroup\": \"{row[5]}\"}}";
                         }
                         else
                         {
-                            jsonResult += $",{{\"PreTaxCost\": {cost},\"Date\": \"{row[1]}\",\"ResourceId\": \"{row[2]}\",\"ResourceType\": \"{row[3]}\",\"Meter\": \"{row[4]}\",\"MeterCategory\": \"{row[5]}\",\"MeterSubcategory\": \"{row[6]}\",\"SubscriptionName\": \"{row[7]}\",\"ServiceName\": \"{row[8]}\",\"ServiceTier\": \"{row[9]}\",\"ResourceGroup\": \"{row[10]}\"}}";
+                            jsonResult += $",{{\"PreTaxCost\": {cost},\"Date\": \"{row[1]}\",\"ResourceId\": \"{row[2]}\",\"ResourceType\": \"{row[3]}\",\"SubscriptionName\": \"{row[4]}\",\"ResourceGroup\": \"{row[5]}\"}}";
                         }
                     }
 
