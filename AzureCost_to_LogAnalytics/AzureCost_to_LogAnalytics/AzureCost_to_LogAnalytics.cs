@@ -94,7 +94,7 @@ namespace AzureCost_to_LogAnalytics
 
 
         [FunctionName("DailyCostLoad")]
-        public static async void Run([TimerTrigger("0 7 */1 * *")]TimerInfo myTimer, ILogger log)
+        public static async void Run([TimerTrigger("* 0 7 */1 * *")]TimerInfo myTimer, ILogger log)
         {
             DateTime start = DateTime.Now.AddDays(-1);
 
