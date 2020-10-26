@@ -79,11 +79,9 @@ namespace AzureCost_to_LogAnalytics
                 //log.LogInformation($"Cost Data: {jsonResult}");
                 logAnalytics.Post(jsonResult);
 
-                string nextLink = null;
-                nextLink = result.properties.nextLink.ToString();
-
-                if (!string.IsNullOrEmpty(nextLink))
+                if (result.properties.nextLink != null)
                 {
+                    string nextLink = result.properties.nextLink.ToString();
                     skipToken = nextLink.Split('&')[1];
                     Console.WriteLine(skipToken);
                     callAPIPage(scope, skipToken, workspaceid, workspacekey, logName, log, myJson);
@@ -94,7 +92,7 @@ namespace AzureCost_to_LogAnalytics
 
 
         [FunctionName("DailyCostLoad")]
-        public static async void Run([TimerTrigger("0 0 13 * * *")]TimerInfo myTimer, ILogger log)
+        public static async void Run([TimerTrigger("0 35 13 * * *")]TimerInfo myTimer, ILogger log)
         {
             DateTime start = DateTime.Now.AddDays(-1);
 
@@ -189,10 +187,9 @@ namespace AzureCost_to_LogAnalytics
                     jsonResult += "]";
                     logAnalytics.Post(jsonResult);
 
-                    string nextLink = result.properties.nextLink.ToString();
-
-                    if (!string.IsNullOrEmpty(nextLink))
+                    if (result.properties.nextLink != null)
                     {
+                        string nextLink = result.properties.nextLink.ToString();
                         string skipToken = nextLink.Split('&')[1];
                         callAPIPage(scope, skipToken, workspaceid, workspacekey, logName, log, myJson);
                     }
