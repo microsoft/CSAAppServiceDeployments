@@ -121,7 +121,7 @@ namespace AzureCost_to_LogAnalytics
                 // Initialization.  
                HttpResponseMessage response = new HttpResponseMessage();
 
-               DateTime startTime = DateTime.Now.AddDays(-180);
+               DateTime startTime = DateTime.Now.AddDays(-30);
                DateTime endTime = DateTime.Now;
                string start = startTime.ToString("MM/dd/yyyy");
                string end = endTime.ToString("MM/dd/yyyy");
