@@ -18,11 +18,9 @@
       "deployFunctionAppTemplate": "[concat(variables('gitUri'),'/ConsumptionFunctionApp.json')]",
       "deployFunctionGitHubTemplate": "[concat(variables('gitUri'),'/WebAppSourceControl.json')]",
       "deployLATemplateURL": "[concat(variables('gitUri'),'/Log_Analytics_Workspace.json')]",
-      "deployAppInsightsURL": "[concat(variables('gitUri'),'/ApplicationInsights.json')]",
       "deployStorageAccountURL": "[concat(variables('gitUri'),'/StorageAccount.json')]",
       "laName": "[concat(parameters('deploymentPrefix'),'la',uniqueString(resourceGroup().name))]",
       "appName": "[concat(parameters('deploymentPrefix'),'costingestionfa',uniqueString(resourceGroup().name))]",
-      "appInsightsName": "[concat(parameters('deploymentPrefix'),'ai',uniqueString(resourceGroup().name))]",
       "saName": "[tolower(concat(parameters('deploymentPrefix'),'sa',uniqueString(resourceGroup().name)))]"      
     },
     "resources": [
@@ -40,24 +38,6 @@
           "parameters": {
             "workspaceName": {
               "value": "[variables('laName')]"
-            }
-          }
-        }
-      },
-      {
-        "name": "deployAppInsights",
-        "type": "Microsoft.Resources/deployments",
-        "apiVersion": "2018-05-01",
-        "dependsOn": [],
-        "properties": {
-          "mode": "Incremental",
-          "templateLink": {
-            "uri": "[variables('deployAppInsightsURL')]",
-            "contentVersion": "1.0.0.0"
-          },
-          "parameters": {
-            "name": {
-              "value": "[variables('appInsightsName')]"
             }
           }
         }
@@ -92,8 +72,7 @@
         "apiVersion": "2018-05-01",
         "dependsOn": [
             "deployStorageAccount",
-            "deployLogAnalytics",
-            "deployAppInsights"
+            "deployLogAnalytics"
         ],
         "properties": {
           "mode": "Incremental",
@@ -119,8 +98,7 @@
                     "WEBSITE_TIME_ZONE|Eastern Standard Time",
                     "[concat('scope|',parameters('scope'),'')]",
                     "[concat('workspaceid|',reference('deployLogAnalytics').outputs.customerId.value,'')]",
-                    "[concat('workspacekey|',reference('deployLogAnalytics').outputs.workspaceKey.value,'')]",
-                    "[concat('APPINSIGHTS_INSTRUMENTATIONKEY|',reference('deployAppInsights').outputs.aiKey.value,'')]"
+                    "[concat('workspacekey|',reference('deployLogAnalytics').outputs.workspaceKey.value,'')]"
                 ]
             }
           }
