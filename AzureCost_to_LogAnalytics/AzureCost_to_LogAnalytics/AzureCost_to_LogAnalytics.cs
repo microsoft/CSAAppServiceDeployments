@@ -92,7 +92,7 @@ namespace AzureCost_to_LogAnalytics
 
 
         [FunctionName("DailyCostLoad")]
-        public static async void Run([TimerTrigger("0 0 14 * * *")]TimerInfo myTimer, ILogger log)
+        public static async void Run([TimerTrigger("0 0 12 * * *")]TimerInfo myTimer, ILogger log)
         {
             DateTime start = DateTime.Now.AddDays(-1);
 
@@ -169,29 +169,82 @@ namespace AzureCost_to_LogAnalytics
 
                     
                     jsonResult = "[";
-                    for(int i = 0;i < result.properties.rows.Length;i++)
+                    for (int i = 0; i < result.properties.rows.Length; i++)
                     {
-                        object[] row = result.properties.rows[i];
-                        double cost = Convert.ToDouble(row[0]);
-
-                        if (i == 0)
+                        object[] row;
+                        try
                         {
-                            jsonResult += $"{{\"PreTaxCost\": {cost},\"Date\": \"{row[1]}\",\"ResourceId\": \"{row[2]}\",\"ResourceType\": \"{row[3]}\",\"SubscriptionName\": \"{row[4]}\",\"ResourceGroup\": \"{row[5]}\"}}";
-                        }
-                        else
-                        {
-                            jsonResult += $",{{\"PreTaxCost\": {cost},\"Date\": \"{row[1]}\",\"ResourceId\": \"{row[2]}\",\"ResourceType\": \"{row[3]}\",\"SubscriptionName\": \"{row[4]}\",\"ResourceGroup\": \"{row[5]}\"}}";
-                        }
-                    }
+                            row = result.properties.rows[i];
+                            double cost = Convert.ToDouble(row[0]);
+                            string sDate = Convert.ToString(row[1]);
+                            string sResourceId;
+                            try
+                            {
+                                sResourceId = Convert.ToString(row[2]);
+                            }
+                            catch
+                            {
+                                sResourceId = "";
+                            }
+                            string sResourceType;
+                            try
+                            {
+                                sResourceType = Convert.ToString(row[3]);
+                            }
+                            catch
+                            {
+                                sResourceType = "";
+                            }
+                            string sSubscriptionName;
+                            try
+                            {
+                                sSubscriptionName = Convert.ToString(row[4]);
+                            }
+                            catch
+                            {
+                                sSubscriptionName = "";
+                            }
+                            string sResourceGroup;
+                            try
+                            {
+                                sResourceGroup = Convert.ToString(row[5]);
+                            }
+                            catch
+                            {
+                                sResourceGroup = "";
+                            }
 
-                    jsonResult += "]";
-                    logAnalytics.Post(jsonResult);
 
-                    if (result.properties.nextLink != null)
-                    {
-                        string nextLink = result.properties.nextLink.ToString();
-                        string skipToken = nextLink.Split('&')[1];
-                        callAPIPage(scope, skipToken, workspaceid, workspacekey, logName, log, myJson);
+                            if (i == 0)
+                            {
+                                jsonResult += $"{{\"PreTaxCost\": {cost},\"Date\": \"{sDate}\",\"ResourceId\": \"{sResourceId}\",\"ResourceType\": \"{sResourceType}\",\"SubscriptionName\": \"{sSubscriptionName}\",\"ResourceGroup\": \"{sResourceGroup}\"}}";
+                            }
+                            else
+                            {
+                                jsonResult += $",{{\"PreTaxCost\": {cost},\"Date\": \"{sDate}\",\"ResourceId\": \"{sResourceId}\",\"ResourceType\": \"{sResourceType}\",\"SubscriptionName\": \"{sSubscriptionName}\",\"ResourceGroup\": \"{sResourceGroup}\"}}";
+                            }
+
+
+                            jsonResult += "]";
+
+                            log.LogInformation($"Cost Data: {jsonResult}");
+                            Console.WriteLine($"Cost Data: {jsonResult}");
+                            logAnalytics.Post(jsonResult);
+
+                            string nextLink = result.properties.nextLink.ToString();
+
+                            if (!string.IsNullOrEmpty(nextLink))
+                            {
+                                string skipToken = nextLink.Split('&')[1];
+                                callAPIPage(scope, skipToken, workspaceid, workspacekey, logName, log, myJson);
+                            }
+
+                            //return new OkObjectResult(jsonResult);
+                        }
+                        catch
+                        { }
+
+
                     }
                 }
             }

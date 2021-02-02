@@ -254,6 +254,7 @@ namespace AzureCost_to_LogAnalytics
                         }
                         catch
                         { }
+                    
                     }
                 }
 
