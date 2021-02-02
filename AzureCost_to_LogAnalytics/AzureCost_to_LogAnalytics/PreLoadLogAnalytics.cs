@@ -239,6 +239,7 @@ namespace AzureCost_to_LogAnalytics
                             jsonResult += "]";
 
                             log.LogInformation($"Cost Data: {jsonResult}");
+                            Console.WriteLine($"Cost Data: {jsonResult}");
                             logAnalytics.Post(jsonResult);
 
                             string nextLink = result.properties.nextLink.ToString();
