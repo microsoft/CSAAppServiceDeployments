@@ -4,7 +4,7 @@
   "bindings": [
     {
       "type": "timerTrigger",
-      "schedule": "0 4 * * *",
+      "schedule": "0 0 14 * * *",
       "useMonitor": true,
       "runOnStartup": false,
       "name": "myTimer"
