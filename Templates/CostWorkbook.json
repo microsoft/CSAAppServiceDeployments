@@ -1,0 +1,158 @@
+{
+  "version": "Notebook/1.0",
+  "items": [
+    {
+      "type": 1,
+      "content": {
+        "json": "# Cost Anamalies Report  \r\nThis workbook utilizes the built in anamaly detection in Azure Log Analytics to detect cost anamalies accross you environment.  \r\n\r\nSelect the Log Analytics Workspace below where you are ingesting you Log Data"
+      },
+      "name": "text - 5"
+    },
+    {
+      "type": 9,
+      "content": {
+        "version": "KqlParameterItem/1.0",
+        "parameters": [
+          {
+            "id": "59e8c1df-e220-429a-b198-6bc3d143f17f",
+            "version": "KqlParameterItem/1.0",
+            "name": "Workspace",
+            "type": 5,
+            "query": "where type == \"microsoft.operationalinsights/workspaces\"",
+            "crossComponentResources": [
+              "value::all"
+            ],
+            "value": "{{workspaceResourceId}}",
+            "typeSettings": {
+              "resourceTypeFilter": {
+                "microsoft.operationalinsights/workspaces": true
+              },
+              "additionalResourceOptions": []
+            },
+            "timeContext": {
+              "durationMs": 86400000
+            },
+            "queryType": 1,
+            "resourceType": "microsoft.resourcegraph/resources"
+          }
+        ],
+        "style": "pills",
+        "queryType": 0,
+        "resourceType": "microsoft.resourcegraph/resources"
+      },
+      "name": "parameters - 4"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "let ids=AzureCostAnamolies_CL\r\n| extend Date=todatetime(Date_s)\r\n| order by Date_s\r\n| distinct Date,ResourceId,ResourceGroup,PreTaxCost_d\r\n| make-series Cost=sum(PreTaxCost_d) on Date in range(startofday(ago(90d)), endofday(ago(1d)), 1d) by ResourceGroup\r\n| extend outliers=series_decompose_anomalies(Cost)\r\n| mvexpand outliers, Date\r\n| where Date >= ago(7d)\r\n| where outliers>=1\r\n| distinct ResourceGroup;\r\nAzureCostAnamolies_CL\r\n| extend Date = todatetime(Date_s)  \r\n| where Date >= ago(7d)\r\n| where ResourceGroup  in (ids)\r\n| order by Date asc\r\n| make-series Cost=sum(PreTaxCost_d) on Date in range(startofday(ago(7d)), endofday(ago(1d)), 1d) by ResourceGroup \r\n| extend  outliers=series_decompose_anomalies(Cost)\r\n| project ResourceGroup, outliers, Cost",
+        "size": 0,
+        "title": "Anomolies by Resource Group (Last 7 days)",
+        "exportMultipleValues": true,
+        "exportedParameters": [
+          {
+            "fieldName": "ResourceGroup",
+            "parameterName": "ResourceGroup",
+            "parameterType": 1
+          }
+        ],
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "crossComponentResources": [
+          "{Workspace}"
+        ],
+        "visualization": "table",
+        "gridSettings": {
+          "formatters": [
+            {
+              "columnMatch": "outliers",
+              "formatter": 10,
+              "formatOptions": {
+                "palette": "blue"
+              }
+            },
+            {
+              "columnMatch": "Cost",
+              "formatter": 10,
+              "formatOptions": {
+                "palette": "blue"
+              }
+            },
+            {
+              "columnMatch": "PreTaxCost",
+              "formatter": 10,
+              "formatOptions": {
+                "palette": "blue"
+              }
+            },
+            {
+              "columnMatch": "FailedLogins",
+              "formatter": 10,
+              "formatOptions": {
+                "palette": "blue"
+              }
+            }
+          ]
+        },
+        "chartSettings": {
+          "xAxis": "CostDate",
+          "group": "ResourceId",
+          "createOtherGroup": 15,
+          "xSettings": {},
+          "ySettings": {}
+        }
+      },
+      "customWidth": "50",
+      "name": "query - 0"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "AzureCostAnamolies_CL\r\n| extend UsageDateTime = todatetime(Date_s)\r\n| where UsageDateTime  >= startofday(ago(7d))\r\n| distinct UsageDateTime,ResourceId,ResourceGroup,PreTaxCost_d\r\n| where ResourceGroup in ({ResourceGroup}) \r\n| summarize PreTaxCost=todouble(sum(PreTaxCost_d)) by ResourceGroup, UsageDateTime\r\n",
+        "size": 0,
+        "title": "Cost over 7 Days",
+        "timeContext": {
+          "durationMs": 2592000000
+        },
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "crossComponentResources": [
+          "{Workspace}"
+        ],
+        "visualization": "barchart"
+      },
+      "conditionalVisibility": {
+        "parameterName": "ResourceGroup",
+        "comparison": "isNotEqualTo"
+      },
+      "customWidth": "50",
+      "name": "query - 5"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "AzureCostAnamolies_CL\r\n| extend UsageDateTime = todatetime(Date_s)\r\n| where UsageDateTime  >= startofday(ago(7d))\r\n| distinct UsageDateTime,ResourceId,ResourceGroup,PreTaxCost_d\r\n| where ResourceGroup in ({ResourceGroup}) \r\n| summarize PreTaxCost=todouble(sum(PreTaxCost_d)) by ResourceId, UsageDateTime",
+        "size": 0,
+        "title": "Cost by ResourceId over 7 days",
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "crossComponentResources": [
+          "{Workspace}"
+        ],
+        "visualization": "unstackedbar"
+      },
+      "conditionalVisibility": {
+        "parameterName": "ResourceGroup",
+        "comparison": "isNotEqualTo"
+      },
+      "name": "query - 5 - Copy"
+    }
+  ],
+  "fallbackResourceIds": [
+    "Azure Monitor"
+  ],
+  "$schema": "https://github.com/Microsoft/Application-Insights-Workbooks/blob/master/schema/workbook.json"
+}

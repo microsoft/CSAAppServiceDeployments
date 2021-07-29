@@ -1,0 +1,13 @@
+{
+  "profiles": {
+    "AzureCost_to_LogAnalytics": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "workspacekey": "JPaOztF0LX5/FvW1FaY/d46UwcMvGvwOru0espBVq6V02tLb55iEDIxByFLI9GPBI8dHwDKaGafT62/aVuu3RA==",
+        "logName": "AzureCostAnamolies",
+        "scope": "providers/Microsoft.Billing/billingAccounts/21551c7c-7dad-43eb-99ed-53fbcf8e6d7b:8e8888b8-4934-4580-8599-d9d60bd96aab_2019-05-31",
+        "workspaceid": "81cf0f53-fd25-4877-910a-c5071fabff70"
+      }
+    }
+  }
+}
