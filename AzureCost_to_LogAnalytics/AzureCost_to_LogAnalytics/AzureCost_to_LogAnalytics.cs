@@ -223,28 +223,23 @@ namespace AzureCost_to_LogAnalytics
                             {
                                 jsonResult += $",{{\"PreTaxCost\": {cost},\"Date\": \"{sDate}\",\"ResourceId\": \"{sResourceId}\",\"ResourceType\": \"{sResourceType}\",\"SubscriptionName\": \"{sSubscriptionName}\",\"ResourceGroup\": \"{sResourceGroup}\"}}";
                             }
-
-
-                            jsonResult += "]";
-
-                            log.LogInformation($"Cost Data: {jsonResult}");
-                            Console.WriteLine($"Cost Data: {jsonResult}");
-                            logAnalytics.Post(jsonResult);
-
-                            string nextLink = result.properties.nextLink.ToString();
-
-                            if (!string.IsNullOrEmpty(nextLink))
-                            {
-                                string skipToken = nextLink.Split('&')[1];
-                                callAPIPage(scope, skipToken, workspaceid, workspacekey, logName, log, myJson);
-                            }
-
-                            //return new OkObjectResult(jsonResult);
                         }
                         catch
                         { }
+                    }
 
+                    jsonResult += "]";
 
+                    log.LogInformation($"Cost Data: {jsonResult}");
+                    Console.WriteLine($"Cost Data: {jsonResult}");
+                    logAnalytics.Post(jsonResult);
+
+                    string nextLink = result.properties.nextLink.ToString();
+
+                    if (!string.IsNullOrEmpty(nextLink))
+                    {
+                        string skipToken = nextLink.Split('&')[1];
+                        callAPIPage(scope, skipToken, workspaceid, workspacekey, logName, log, myJson);
                     }
                 }
             }
